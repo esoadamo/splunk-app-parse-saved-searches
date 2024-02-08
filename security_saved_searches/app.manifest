@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "2.0.0",
+  "info": {
+    "title": "SecuritySavedSearches",
+    "id": {
+      "group": null,
+      "name": "security_saved_searches",
+      "version": "0.0.33"
+    },
+    "author": [
+        {
+           "email": "adam.hlavacek@here.com",
+           "name": "Adam Hlavacek"
+        }
+    ],
+    "releaseDate": null,
+    "description": "An application able to parse records into saved searches & schedule them",
+    "classification": {
+      "intendedAudience": null,
+      "categories": [],
+      "developmentStatus": null
+    },
+    "commonInformationModels": null,
+    "license": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "privacyPolicy": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "releaseNotes": {
+      "name": null,
+      "text": "./README.md",
+      "uri": null
+    }
+  },
+  "dependencies": {},
+  "tasks": null,
+  "inputGroups": null,
+  "incompatibleApps": null,
+  "platformRequirements": null,
+  "supportedDeployments": [
+    "_standalone",
+    "_distributed"
+  ],
+  "targetWorkloads": null
+}
