@@ -1,7 +1,7 @@
 from pathlib import Path
 from json import loads
 
-DIR_APP = Path(__file__) / ".." / "security_saved_searches"
+DIR_APP = Path(__file__) / ".." /  ".." / "security_saved_searches"
 FILE_MANIFEST = DIR_APP / "app.manifest"
 FILE_CONF = DIR_APP / "default" / "app.conf"
 FILE_POERTY = DIR_APP / ".." / "pyproject.toml"

@@ -167,8 +167,8 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
         keys = ["name", "cron", "search", "enabled"] + ([] if not DEBUG else ["debug_log"])
         
         data = {key: kwargs.get(key, "") for key in keys}
-        
-        if "debug_log" in keys and "debug_log" not in data:
+
+        if "debug_log" in data and not data["debug_log"]:
             try:
                 data["debug_log"] = joblog().pop(0)
             except IndexError:

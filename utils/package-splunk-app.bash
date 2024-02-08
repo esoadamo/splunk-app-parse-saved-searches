@@ -17,7 +17,7 @@ if [ "$SCOPE" == "--scope=ci-cd" ]; then
     find . -type f -print -exec chmod o-wx {} \;
 fi
 
-splunk-appinspect inspect security_saved_searches
+splunk-appinspect inspect security_saved_searches --mode precert --included-tags cloud
 slim package security_saved_searches -o app
 
 cd app
