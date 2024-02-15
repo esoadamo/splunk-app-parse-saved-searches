@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./security_saved_searches/lib"
+    ]
+}

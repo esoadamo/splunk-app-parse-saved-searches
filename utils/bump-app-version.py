@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+"""
+Increases minor app version by 1 in all relevant places
+"""
+
 from pathlib import Path
 from json import loads
 

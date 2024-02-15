@@ -6,10 +6,19 @@ except ImportError:
     TypedDict = Dict
     pass  # Splunk is using too old Python version
 
-DEBUG = False
-APP = "security_saved_searches"
+DEBUG = False  # enables saving of joblog, can be enabled by passing verbose=yes to the command
+APP = "security_saved_searches"  # the ID of the applications where saved searches shall be saved
 
 def joblog(*args, log_lines = [], **kwargs):
+    """Logs info about progress to the inpsect log and debug_logs column if enabled.
+    Must be enabled by DEBUG = True. All non-key-based args are same as for `print` command.
+
+    Args:
+        log_lines (list, optional): A global storage of all log lines.
+
+    Returns:
+        Currently saved log files from the log_lines parameter.
+    """
     if not DEBUG:
         return
     if args:
@@ -18,10 +27,9 @@ def joblog(*args, log_lines = [], **kwargs):
     return log_lines
 
 
+# Load all local libraries
 joblog("Opened")
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lib"))
-
 from splunklib.searchcommands import (
     StreamingCommand,
     Configuration,
@@ -49,12 +57,15 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
     )
 
     def stream_safe(self, records):
+        # Check if debugging should be enabled
         if self.verbose and self.verbose.lower() == "yes":
             global DEBUG
             DEBUG = True
 
+        # Initialize saved_searches object service
         saved_searches = self.service.saved_searches
         
+        # Get the list of all currently existing saved searches as to detect which are already present
         existing_searches_names: Set[str] = set()
 
         joblog("Existing saved searches")
@@ -62,6 +73,7 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
             existing_searches_names.add(current_search.name)
         joblog("-- " + ', '.join(existing_searches_names))
 
+        # Go through all search records and parse them into saved searches (and return back parsed values)
         new_searches_records: Dict[str, SearchRecord] = {}
 
         joblog("Parse records")
@@ -89,14 +101,19 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
             else:
                 joblog(f"-- search {search_name} already exists")
         
+        # Re-fetch existing searches to include newly created
         existing_searches: List[SavedSearch] = saved_searches.list(app=APP)
+        
+        # If some search was not found inside passed records, add its name to this set to remove it later
         searches_to_remove_names: Set[str] = set()
 
+        # Sync saved searches with current records
         joblog("Sync searches")
         for current_search in existing_searches:
             joblog(f"- processing {current_search.name}")
             new_record = new_searches_records.get(current_search.name)
             if new_record is None:
+                # Existing search was not found inside current records, remove it
                 joblog(f"-- scheduled to be removed")
                 searches_to_remove_names.add(current_search.name)
                 continue
@@ -107,6 +124,7 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
             search_scheduled = bool(int(content["is_scheduled"]))
             cron_schedule = content["cron_schedule"]
 
+            # Sync enabled status
             if new_record["enabled"] != search_enabled:
                 if new_record["enabled"]:
                     joblog("-- enabling")
@@ -115,10 +133,12 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
                     joblog("-- disabling")
                     current_search.disable()
 
+            # Sync search value
             if search_search != new_record["search"]:
                 joblog("-- updating search")
                 current_search.update(search=new_record["search"])
 
+            # Sync schedule
             if cron_schedule != new_record["cron"]:
                 joblog("-- updating cron")
                 current_search.update(
@@ -126,6 +146,7 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
                 
                 )
                 
+            # Enable/disable the schedule based on the enabled status of whole search
             if new_record["enabled"] != search_scheduled:
                 if new_record["enabled"]:
                     joblog("-- enabling schedule")
@@ -138,6 +159,7 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
                         is_scheduled=False
                     )
 
+        # Remove all searches that were not found in current records
         if searches_to_remove_names:
             joblog("Deleting old searches")
             for search_name in searches_to_remove_names:
@@ -147,6 +169,7 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
 
 
     def stream(self, records):
+        # Run the process safely inside try-catch as to be able to debug the exception if the debugging is enabled 
         joblog("Starting safe stream")
         try:
             yield from self.stream_safe(records)
@@ -160,6 +183,7 @@ class ParsSecuritySavedSearchesCommand(StreamingCommand):
                 raise
 
         if DEBUG:
+            # Yield all leftover logs to the Splunk output
             for line in joblog():
                 yield from self.output_record(debug_log=line)
 

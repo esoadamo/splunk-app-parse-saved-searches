@@ -1,4 +1,7 @@
 #!/bin/bash
+# Inpsects & packages the Splunk into a submissable .tar.giz file
+# Can also auto install dependencies when executed with params --scope=ci-cd
+
 set -eExuo pipefail
 
 set +u
