@@ -5,7 +5,7 @@
     "id": {
       "group": null,
       "name": "security_saved_searches",
-      "version": "0.0.38"
+      "version": "0.0.41"
     },
     "author": [
         {

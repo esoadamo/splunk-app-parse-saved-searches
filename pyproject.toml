@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "splunk-app-parse-saved-searches"
-version = "0.0.38"
+version = "0.0.41"
 description = ""
 authors = ["Adam Hlavacek <git@adamhlavacek.com>"]
 readme = "README.md"
